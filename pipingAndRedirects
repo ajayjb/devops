@@ -1,0 +1,563 @@
+# Linux Piping and Redirects Guide
+
+## Introduction
+
+In Linux, **pipes** and **redirects** are used to control the flow of data between commands, files, and terminal output.
+
+They are one of the most powerful features of the Linux shell.
+
+---
+
+# 1. Standard Streams in Linux
+
+Every Linux process has 3 standard data streams:
+
+| Stream          | Description              | File Descriptor |
+| --------------- | ------------------------ | --------------- |
+| Standard Input  | Input given to a command | `0`             |
+| Standard Output | Normal command output    | `1`             |
+| Standard Error  | Error messages           | `2`             |
+
+Example:
+
+```bash
+ls
+```
+
+* Normal output goes to **stdout**.
+* Errors go to **stderr**.
+
+---
+
+# 2. Pipe Operator `|`
+
+## What is a Pipe?
+
+A pipe (`|`) sends the **output of one command** as the **input to another command**.
+
+Syntax:
+
+```bash
+command1 | command2
+```
+
+Meaning:
+
+```text
+stdout of command1 → stdin of command2
+```
+
+---
+
+## Example 1: View Long Output Page by Page
+
+```bash
+ls -l | less
+```
+
+Explanation:
+
+1. `ls -l` generates a long directory listing.
+2. The output is passed to `less`.
+3. `less` allows scrolling through the output.
+
+---
+
+## Example 2: Search Output Using grep
+
+```bash
+ps aux | grep nginx
+```
+
+Explanation:
+
+1. `ps aux` lists all running processes.
+2. Output is piped to `grep nginx`.
+3. `grep` filters lines containing `nginx`.
+
+---
+
+## Example 3: Count Files
+
+```bash
+ls | wc -l
+```
+
+Explanation:
+
+1. `ls` lists files.
+2. Output is passed to `wc -l`.
+3. `wc -l` counts lines.
+4. Result = number of files.
+
+---
+
+## Multiple Pipes
+
+You can chain multiple commands.
+
+```bash
+cat access.log | grep 404 | sort | uniq
+```
+
+Flow:
+
+```text
+cat → grep → sort → uniq
+```
+
+Explanation:
+
+1. `cat access.log` reads the file.
+2. `grep 404` filters 404 errors.
+3. `sort` sorts lines.
+4. `uniq` removes duplicates.
+
+---
+
+# 3. Output Redirection `>`
+
+## What is `>`?
+
+The `>` operator redirects command output to a file.
+
+Syntax:
+
+```bash
+command > file
+```
+
+Important:
+
+* Creates the file if it does not exist.
+* Overwrites the file if it already exists.
+
+---
+
+## Example 1: Save Output to File
+
+```bash
+ls > files.txt
+```
+
+Explanation:
+
+1. `ls` generates file list.
+2. Instead of displaying on terminal,
+3. Output is stored in `files.txt`.
+
+---
+
+## Example 2: Store System Info
+
+```bash
+uname -a > system.txt
+```
+
+This stores system information into `system.txt`.
+
+---
+
+## Overwrite Behavior
+
+If file already contains data:
+
+```bash
+echo "Hello" > test.txt
+```
+
+Old content is erased.
+
+---
+
+# 4. Append Redirection `>>`
+
+## What is `>>`?
+
+The `>>` operator appends output to a file instead of overwriting.
+
+Syntax:
+
+```bash
+command >> file
+```
+
+---
+
+## Example 1: Append Text
+
+```bash
+echo "New Log" >> logs.txt
+```
+
+Explanation:
+
+* Adds `New Log` to end of file.
+* Existing content remains unchanged.
+
+---
+
+## Example 2: Append Date Repeatedly
+
+```bash
+date >> dates.txt
+```
+
+Each run adds a new date line.
+
+---
+
+# 5. Difference Between `>` and `>>`
+
+| Operator | Action          |
+| -------- | --------------- |
+| `>`      | Overwrites file |
+| `>>`     | Appends to file |
+
+Example:
+
+```bash
+echo "A" > file.txt
+```
+
+Result:
+
+```text
+A
+```
+
+Now:
+
+```bash
+echo "B" > file.txt
+```
+
+Result:
+
+```text
+B
+```
+
+Previous content removed.
+
+Using append:
+
+```bash
+echo "A" >> file.txt
+echo "B" >> file.txt
+```
+
+Result:
+
+```text
+A
+B
+```
+
+---
+
+# 6. Input Redirection `<`
+
+## What is `<`?
+
+The `<` operator sends file content as input to a command.
+
+Syntax:
+
+```bash
+command < file
+```
+
+---
+
+## Example
+
+```bash
+wc -l < names.txt
+```
+
+Explanation:
+
+1. `names.txt` is given as input.
+2. `wc -l` counts lines.
+
+---
+
+# 7. Redirecting Errors
+
+## Standard Error Redirection `2>`
+
+Errors are redirected using file descriptor `2`.
+
+Syntax:
+
+```bash
+command 2> errors.txt
+```
+
+---
+
+## Example
+
+```bash
+ls invalidfile 2> error.txt
+```
+
+Explanation:
+
+* Error message goes into `error.txt`.
+* Terminal stays clean.
+
+---
+
+# 8. Redirect stdout and stderr Together
+
+## Using `&>`
+
+```bash
+command &> output.txt
+```
+
+Both:
+
+* stdout
+* stderr
+
+are stored in same file.
+
+---
+
+## Example
+
+```bash
+ls valid invalid &> all.txt
+```
+
+Both normal output and errors go into `all.txt`.
+
+---
+
+# 9. Combining Pipes and Redirects
+
+Example:
+
+```bash
+ps aux | grep docker > docker_process.txt
+```
+
+Explanation:
+
+1. `ps aux` lists processes.
+2. `grep docker` filters docker processes.
+3. Result saved into `docker_process.txt`.
+
+---
+
+# 10. Tee Command
+
+## What is `tee`?
+
+`tee` allows:
+
+* viewing output on terminal
+* and saving to a file simultaneously.
+
+Syntax:
+
+```bash
+command | tee file
+```
+
+---
+
+## Example
+
+```bash
+ls | tee files.txt
+```
+
+Explanation:
+
+* Output shown on terminal.
+* Same output stored in `files.txt`.
+
+---
+
+## Append with tee
+
+```bash
+command | tee -a file.txt
+```
+
+`-a` means append.
+
+---
+
+# 11. Real-World Examples
+
+## Find Failed Login Attempts
+
+```bash
+cat auth.log | grep "Failed password"
+```
+
+---
+
+## Count Running Docker Containers
+
+```bash
+docker ps | wc -l
+```
+
+---
+
+## Save Disk Usage Report
+
+```bash
+df -h > disk_report.txt
+```
+
+---
+
+## Append Logs Continuously
+
+```bash
+echo "Server Started" >> server.log
+```
+
+---
+
+# 12. Important Notes
+
+## Pipe Uses stdout Only
+
+Pipe transfers only:
+
+```text
+stdout (1)
+```
+
+Errors are not piped unless redirected.
+
+Example:
+
+```bash
+command 2>&1 | another_command
+```
+
+Meaning:
+
+* `2>&1` sends stderr to stdout.
+* Then both are piped.
+
+---
+
+# 13. Quick Summary Table
+
+| Symbol | Purpose                            |                                       |
+| ------ | ---------------------------------- | ------------------------------------- |
+| `      | `                                  | Send output of one command to another |
+| `>`    | Redirect output and overwrite file |                                       |
+| `>>`   | Redirect output and append to file |                                       |
+| `<`    | Take input from file               |                                       |
+| `2>`   | Redirect errors                    |                                       |
+| `&>`   | Redirect stdout + stderr           |                                       |
+| `tee`  | Display and save output together   |                                       |
+
+---
+
+# 14. Common Beginner Mistakes
+
+## Mistake 1: Accidentally Overwriting Files
+
+```bash
+> important.txt
+```
+
+This clears the file completely.
+
+---
+
+## Mistake 2: Confusing Pipe and Redirect
+
+Wrong thinking:
+
+```bash
+command1 > command2
+```
+
+`>` sends output to a file, not another command.
+
+Correct:
+
+```bash
+command1 | command2
+```
+
+---
+
+## Mistake 3: Ignoring stderr
+
+Some commands may appear empty because errors are not redirected.
+
+Use:
+
+```bash
+command > out.txt 2> err.txt
+```
+
+---
+
+# 15. Practice Commands
+
+Try these commands:
+
+```bash
+ls -l | less
+```
+
+```bash
+ps aux | grep bash
+```
+
+```bash
+echo "Hello" > hello.txt
+```
+
+```bash
+echo "World" >> hello.txt
+```
+
+```bash
+cat hello.txt
+```
+
+```bash
+ls invalid 2> errors.txt
+```
+
+```bash
+ls | tee output.txt
+```
+
+---
+
+# Conclusion
+
+Pipes and redirects are essential Linux shell features.
+
+They help you:
+
+* connect commands together
+* process data efficiently
+* save outputs into files
+* automate workflows
+* filter and analyze information
+
+Mastering these operators is very important for:
+
+* Linux administration
+* DevOps
+* Backend development
+* Shell scripting
+* System automation
